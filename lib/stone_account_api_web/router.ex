@@ -7,5 +7,7 @@ defmodule StoneAccountApiWeb.Router do
 
   scope "/api", StoneAccountApiWeb do
     pipe_through :api
+
+    resources "/accounts", AccountController, only: [:create, :show]
   end
 end
