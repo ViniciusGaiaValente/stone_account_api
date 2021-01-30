@@ -51,7 +51,13 @@ defmodule StoneAccountApi.Banking do
       |> Repo.insert()
 
     case result do
-      { :ok, account } -> { :ok, Repo.preload(account, :holder) }
+      { :ok, account } ->
+        {
+          :ok,
+          Repo.preload(account, :holder)
+          |> Map.delete(:password)
+          |> Map.delete(:password_hash)
+        }
       { :error, error } -> { :error, error }
     end
   end

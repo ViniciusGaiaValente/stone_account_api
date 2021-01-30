@@ -34,11 +34,7 @@ defmodule StoneAccountApi.BankingTest do
 
     test "get_account!/1 returns the account with given id" do
       account = account_fixture()
-      assert Banking.get_account!(account.id)
-        ==
-        account
-        |> Map.delete(:password)
-        |> Map.delete(:password_hash)
+      assert Banking.get_account!(account.id) == account
     end
 
     test "create_account/1 with valid data creates a account" do
