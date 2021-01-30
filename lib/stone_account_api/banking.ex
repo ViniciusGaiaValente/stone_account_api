@@ -43,7 +43,7 @@ defmodule StoneAccountApi.Banking do
   def create_account(attrs \\ %{}) do
     attrs =
       attrs
-      |> Map.put("balance", 1000)
+      |> Map.put("balance", Money.new(100000, :BRL))
 
     result =
       %Account{}

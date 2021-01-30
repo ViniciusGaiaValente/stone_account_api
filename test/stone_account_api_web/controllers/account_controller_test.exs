@@ -33,7 +33,9 @@ defmodule StoneAccountApiWeb.AccountControllerTest do
       account = json_response(conn, 200)["data"]
 
       assert is_integer(account["number"])
-      assert account["balance"] == 1000
+      assert account["balance"]["decimal"] == "1000"
+      assert account["balance"]["display"] == "R$1.000,00"
+      assert account["balance"]["precise"] == 100000
       assert account["holder"]["birthdate"] == "2014-04-17T14:00:00"
       assert account["holder"]["email"] == "email3@email.com"
       assert account["holder"]["name"] == "John Doe"

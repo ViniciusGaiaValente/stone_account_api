@@ -44,7 +44,7 @@ defmodule StoneAccountApi.BankingTest do
     test "create_account/1 with valid data creates a account" do
       assert {:ok, %Account{} = account} = Banking.create_account(@valid_attrs)
       assert is_integer(account.number)
-      assert account.balance == 1000
+      assert account.balance.amount == 100000
       assert account.holder.birthdate == ~N[2014-04-17 14:00:00]
       assert account.holder.email == "email3@email.com"
       assert account.holder.name == "John Doe"

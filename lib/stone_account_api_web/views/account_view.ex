@@ -13,7 +13,11 @@ defmodule StoneAccountApiWeb.AccountView do
   def render("account.json", %{account: account}) do
     %{id: account.id,
       number: account.number,
-      balance: account.balance,
+      balance: %{
+        precise: account.balance.amount,
+        decimal: Money.to_decimal(account.balance),
+        display: Money.to_string(account.balance, fractional_unit: true),
+      },
       holder: StoneAccountApiWeb.HolderView.render("holder.json", %{ holder: account.holder })}
   end
 end

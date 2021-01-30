@@ -6,7 +6,7 @@ defmodule StoneAccountApi.Banking.Account do
   @foreign_key_type :binary_id
   schema "accounts" do
     field :number, :integer, read_after_writes: true
-    field :balance, :integer
+    field :balance, Money.Ecto.Amount.Type
     field :password_hash, :string
     field :password, :string, virtual: true
 
