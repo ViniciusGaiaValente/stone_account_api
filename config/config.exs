@@ -28,14 +28,18 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :money,
-        default_currency: :BRL,           # this allows you to do Money.new(100)
-        separator: ".",                   # change the default thousands separator for Money.to_string
-        delimiter: ",",                   # change the default decimal delimeter for Money.to_string
-        symbol: true,                     # don’t display the currency symbol in Money.to_string
-        symbol_on_right: false,           # position the symbol
-        symbol_space: false,              # add a space between symbol and number
-        fractional_unit: true,           # display units after the delimeter
-        strip_insignificant_zeros: false  # don’t display the insignificant zeros or the delimeter
+  default_currency: :BRL,           # this allows you to do Money.new(100)
+  separator: ".",                   # change the default thousands separator for Money.to_string
+  delimiter: ",",                   # change the default decimal delimeter for Money.to_string
+  symbol: true,                     # don’t display the currency symbol in Money.to_string
+  symbol_on_right: false,           # position the symbol
+  symbol_space: false,              # add a space between symbol and number
+  fractional_unit: true,            # display units after the delimeter
+  strip_insignificant_zeros: false  # don’t display the insignificant zeros or the delimeter
+
+config :stone_account_api, StoneAccountApi.Auth.Guardian,
+  issuer: "stone_account_api",
+  secret_key: "D+1809QUhRIhDXa09FCyV5j2OdzolpMcrGVAeEMVtWmueE0YiRtwWXxEc3uYn8Fg"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

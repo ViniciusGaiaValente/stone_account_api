@@ -5,9 +5,24 @@ defmodule StoneAccountApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug StoneAccountApiWeb.AuthPlug
+  end
+
+  pipeline :owner do
+    plug StoneAccountApiWeb.OwnerPlug
+  end
+
   scope "/api", StoneAccountApiWeb do
     pipe_through :api
 
-    resources "/accounts", AccountController, only: [:create, :show]
+    post "/accounts/signup", AccountController, :create
+    get "/accounts/signin", AccountController, :signin
+  end
+
+  scope "/api", StoneAccountApiWeb do
+    pipe_through [:api, :auth, :owner]
+
+    get "/accounts/:number", AccountController, :show
   end
 end
