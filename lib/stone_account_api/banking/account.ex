@@ -22,6 +22,12 @@ defmodule StoneAccountApi.Banking.Account do
     |> put_pass_hash()
   end
 
+  def balance_update_changeset(account, attrs) do
+    account
+    |> cast(attrs, [:balance])
+    |> validate_required([:balance])
+  end
+
   defp put_pass_hash(
     %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
   ) do

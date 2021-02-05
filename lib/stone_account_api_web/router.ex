@@ -24,5 +24,6 @@ defmodule StoneAccountApiWeb.Router do
     pipe_through [:api, :auth, :owner]
 
     get "/accounts/:number", AccountController, :show
+    post "/trasnference/transfer", TransferenceController, :transfer
   end
 end
