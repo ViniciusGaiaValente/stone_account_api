@@ -5,7 +5,6 @@ defmodule StoneAccountApi.TransferenceTest do
 
     alias StoneAccountApi.Banking
     alias StoneAccountApi.Transference
-    alias StoneAccountApi.Auth.Guardian
 
     @sender_attrs %{
       "password" => "some password",
@@ -30,9 +29,7 @@ defmodule StoneAccountApi.TransferenceTest do
         |> Enum.into(@sender_attrs)
         |> Banking.create_account()
 
-      {:ok, token} = Guardian.authenticate(account.number, "some password")
-
-      %{ account: account, token: token }
+      %{ account: account }
     end
 
     def receiver_fixture(attrs \\ %{}) do
@@ -44,7 +41,7 @@ defmodule StoneAccountApi.TransferenceTest do
       account
     end
 
-    test "trasfer/3 valid entry performs correctly" do
+    test "trasfer/3 with a valid entry performs correctly" do
       %{ account: sender } = sender_fixture()
       receiver = receiver_fixture()
 

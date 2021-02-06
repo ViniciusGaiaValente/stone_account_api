@@ -18,5 +18,8 @@ config :stone_account_api, StoneAccountApiWeb.Endpoint,
   http: [port: 4002],
   server: false
 
+# We don't run a server during test. If one is required,
+config :bcrypt_elixir, log_rounds: 4
+
 # Print only warnings and errors during test
 config :logger, level: :warn

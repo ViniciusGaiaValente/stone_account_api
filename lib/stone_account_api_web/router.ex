@@ -25,5 +25,6 @@ defmodule StoneAccountApiWeb.Router do
 
     get "/accounts/:number", AccountController, :show
     post "/trasnference", TransferenceController, :transfer
+    post "/withdraw", WithdrawController, :withdraw
   end
 end
