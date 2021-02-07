@@ -27,4 +27,11 @@ defmodule StoneAccountApiWeb.Router do
     post "/trasnference", TransferenceController, :transfer
     post "/withdraw", WithdrawController, :withdraw
   end
+
+  scope "/api/backofice", StoneAccountApiWeb do
+    pipe_through :api
+
+    get "/withdraws", WithdrawRegisterController, :index
+    get "/trasnferencee", TransferenceRegisterController, :index
+  end
 end

@@ -18,6 +18,7 @@ defmodule StoneAccountApi.Withdraw do
   alias StoneAccountApi.Banking
   alias StoneAccountApi.Banking.Account
   alias StoneAccountApi.Withdraw
+  alias StoneAccountApi.Backoffice
 
   def withdraw(logged_account, origin, value) do
     withdraw(
@@ -180,18 +181,30 @@ defmodule StoneAccountApi.Withdraw do
 
   defp backoffice_entry(
     %Withdraw{
-      # origin_account_number: origin_account_number,
-      # destination_account_number: destination_account_number,
-      # errors: errors,
-      # value: value,
+      origin_account: origin_account,
+      origin_account_new_balance: origin_account_new_balance,
+      value: value,
       valid: valid
     } = withdraw
   ) do
+
     if valid do
-      # TODO SAVE SUCESSFULL ENTRY AT THE BACKOFFICE DATABASE
-    else
-      # TODO SAVE FAILED ATEMPT AT THE BACKOFFICE DATABASE
+
+      {result, _reason} = Backoffice.create_withdraw_register(
+        %{
+          new_balance: origin_account_new_balance,
+          old_balance: origin_account.balance,
+          value: Money.new(value),
+          account_id: origin_account.id
+        }
+      )
+
+      if result == :error do
+        # TODO LOG THE CORRECT ERROR
+      end
+
     end
+
     withdraw
   end
 

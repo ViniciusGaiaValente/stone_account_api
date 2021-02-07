@@ -21,6 +21,7 @@ defmodule StoneAccountApi.Transference do
   alias StoneAccountApi.Banking
   alias StoneAccountApi.Banking.Account
   alias StoneAccountApi.Transference
+  alias StoneAccountApi.Backoffice
 
   def tranfer(logged_account, origin, destination, value) do
     tranfer(
@@ -250,18 +251,34 @@ defmodule StoneAccountApi.Transference do
 
   defp backoffice_entry(
     %Transference{
-      # origin_account_number: origin_account_number,
-      # destination_account_number: destination_account_number,
-      # errors: errors,
-      # value: value,
+      origin_account: origin_account,
+      origin_account_new_balance: origin_account_new_balance,
+      destination_account: destination_account,
+      destination_account_new_balance: destination_account_new_balance,
+      value: value,
       valid: valid
     } = transference
   ) do
     if valid do
-      # TODO SAVE SUCESSFULL ENTRY AT THE BACKOFFICE DATABASE
-    else
-      # TODO SAVE FAILED ATEMPT AT THE BACKOFFICE DATABASE
+
+      {result, _reason} = Backoffice.create_transference_register(
+        %{
+          origin_old_balance: origin_account.balance,
+          origin_new_balance: origin_account_new_balance,
+          destination_old_balance: destination_account.balance,
+          destination_new_balance: destination_account_new_balance,
+          value: Money.new(value),
+          origin_id: origin_account.id,
+          destination_id: destination_account.id
+        }
+      )
+
+      if result == :error do
+        # TODO LOG THE CORRECT ERROR
+      end
+
     end
+
     transference
   end
 
