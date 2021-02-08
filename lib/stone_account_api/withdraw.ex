@@ -37,7 +37,7 @@ defmodule StoneAccountApi.Withdraw do
     |> fetch_account()
     |> check_account_existence()
     |> check_balance()
-    |> transfer_money()
+    |> withdraw_money()
     |> backoffice_entry()
     |> extract_output()
   end
@@ -79,7 +79,7 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
-  def validate_rules(
+  defp validate_rules(
     %Withdraw{
       valid: valid,
       logged_account_number: logged_account,
@@ -115,7 +115,7 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
-  def check_account_existence(
+  defp check_account_existence(
     %Withdraw{
       origin_account: origin_account,
       errors: errors,
@@ -135,7 +135,7 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
-  def check_balance(
+  defp check_balance(
     %Withdraw{
       origin_account: origin_account,
       value: value,
@@ -159,7 +159,7 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
-  defp transfer_money(
+  defp withdraw_money(
     %Withdraw{
       origin_account: origin_account,
       value: value,
