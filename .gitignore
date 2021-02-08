@@ -27,4 +27,7 @@ stone_account_api-*.tar
 # this depending on your deployment strategy.
 /priv/static/
 
+# Enviroment
 .env
+.dev.env
+.prod.env

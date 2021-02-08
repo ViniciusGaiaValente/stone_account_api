@@ -25,10 +25,21 @@ secret_key_base =
 
 config :stone_account_api, StoneAccountApiWeb.Endpoint,
   http: [
+    host: System.get_env("HOST") || "localhost",
     port: String.to_integer(System.get_env("PORT") || "4000"),
     transport_options: [socket_opts: [:inet6]]
   ],
   secret_key_base: secret_key_base
+
+jwt_key =
+  System.get_env("JWT_KEY") ||
+    raise """
+    environment variable JWT_KEY is missing.
+    You can generate one by calling: mix phx.gen.secret
+    """
+
+config :stone_account_api, StoneAccountApi.Auth.Guardian,
+  secret_key: jwt_key
 
 # ## Using releases (Elixir v1.9+)
 #

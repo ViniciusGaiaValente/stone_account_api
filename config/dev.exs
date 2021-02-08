@@ -2,10 +2,11 @@ use Mix.Config
 
 # Configure your database
 config :stone_account_api, StoneAccountApi.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "stone_account_api_dev",
-  hostname: "localhost",
+  # username: "postgres",
+  # password: "postgres",
+  # database: "stone_account_api_dev",
+  # hostname: "localhost",
+  url: System.get_env("DATABASE_URL"),
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
@@ -16,7 +17,7 @@ config :stone_account_api, StoneAccountApi.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :stone_account_api, StoneAccountApiWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: System.get_env("PORT")],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
