@@ -24,10 +24,15 @@ secret_key_base =
     """
 
 config :stone_account_api, StoneAccountApiWeb.Endpoint,
+  load_from_system_env: true,
+  server: true,
   http: [
-    host: System.get_env("HOST") || "localhost",
-    port: String.to_integer(System.get_env("PORT") || "4000"),
+    port: String.to_integer(System.get_env("PORT") |> IO.inspect() || "4000"),
     transport_options: [socket_opts: [:inet6]]
+  ],
+  url: [
+    host: System.get_env("HOST") |> IO.inspect() || "localhost",
+    port: String.to_integer(System.get_env("PORT") |> IO.inspect() || "4000")
   ],
   secret_key_base: secret_key_base
 
