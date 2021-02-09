@@ -123,4 +123,65 @@ defmodule StoneAccountApi.BackofficeTest do
       assert {:error, %Ecto.Changeset{}} = Backoffice.create_transference_register(@invalid_attrs)
     end
   end
+
+  describe "report" do
+
+    @withdraw_attrs %{new_balance: Money.new(95000), old_balance: Money.new(100000), value: Money.new(5000)}
+    @transference_attrs %{destination_new_balance: Money.new(105000), destination_old_balance: Money.new(100000), origin_new_balance: Money.new(95000), origin_old_balance: Money.new(100000), value: Money.new(5000)}
+
+    def transference_register_specific_accounts_fixture(origin, destination) do
+      {:ok, transference_register} =
+        %{}
+        |> Enum.into(
+          @transference_attrs
+          |> Map.put(:origin_id, origin.id)
+          |> Map.put(:destination_id, destination.id)
+        )
+        |> Backoffice.create_transference_register()
+
+      transference_register
+    end
+
+    def withdraw_register_specific_account_fixture(account) do
+      {:ok, withdraw_register} =
+        %{}
+        |> Enum.into(Map.put(@withdraw_attrs, :account_id, account.id))
+        |> Backoffice.create_withdraw_register()
+
+      withdraw_register
+    end
+
+    test "todays_report/0 works" do
+      origin = account_fixture()
+      destination = other_fixture()
+      transference_register_specific_accounts_fixture(origin, destination)
+      transference_register_specific_accounts_fixture(origin, destination)
+      withdraw_register_specific_account_fixture(origin)
+      withdraw_register_specific_account_fixture(origin)
+
+      assert Backoffice.todays_report() == "R$200,00"
+    end
+
+    test "this_month_report/0 works" do
+      origin = account_fixture()
+      destination = other_fixture()
+      transference_register_specific_accounts_fixture(origin, destination)
+      transference_register_specific_accounts_fixture(origin, destination)
+      withdraw_register_specific_account_fixture(origin)
+      withdraw_register_specific_account_fixture(origin)
+
+      assert Backoffice.this_month_report() == "R$200,00"
+    end
+
+    test "this_year_report/0 works" do
+      origin = account_fixture()
+      destination = other_fixture()
+      transference_register_specific_accounts_fixture(origin, destination)
+      transference_register_specific_accounts_fixture(origin, destination)
+      withdraw_register_specific_account_fixture(origin)
+      withdraw_register_specific_account_fixture(origin)
+
+      assert Backoffice.this_year_report() == "R$200,00"
+    end
+  end
 end

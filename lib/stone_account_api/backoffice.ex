@@ -71,4 +71,96 @@ defmodule StoneAccountApi.Backoffice do
     |> TransferenceRegister.changeset(attrs)
     |> Repo.insert()
   end
+
+  @doc """
+  Returns the sum of today's transaction's values.
+
+  ## Examples
+
+      iex> todays_report()
+      R$1.000,00
+
+  """
+  def todays_report() do #TODO REFACTOR, THIS OPERATION IS VERY EXPENSIVE AND SHOULD BE OPTIMIZED
+    now = Timex.now()
+
+    withdraw_registers = Repo.all(
+      from w in WithdrawRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_day(now),
+      where: w.inserted_at <= ^Timex.end_of_day(now)
+    )
+
+    transference_registers = Repo.all(
+      from w in TransferenceRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_day(now),
+      where: w.inserted_at <= ^Timex.end_of_day(now)
+    )
+
+    calculate_total_value(withdraw_registers, transference_registers)
+  end
+
+  @doc """
+  Returns the sum of this month's transaction's values.
+
+  ## Examples
+
+      iex> this_month_report()
+      R$1.000,00
+
+  """
+  def this_month_report() do #TODO REFACTOR, THIS OPERATION IS VERY EXPENSIVE AND SHOULD BE OPTIMIZED
+    now = Timex.now()
+
+    withdraw_registers = Repo.all(
+      from w in WithdrawRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_month(now),
+      where: w.inserted_at <= ^Timex.end_of_month(now)
+    )
+
+    transference_registers = Repo.all(
+      from w in TransferenceRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_month(now),
+      where: w.inserted_at <= ^Timex.end_of_month(now)
+    )
+
+    calculate_total_value(withdraw_registers, transference_registers)
+  end
+
+  @doc """
+  Returns the sum of this year's transaction's values.
+
+  ## Examples
+
+      iex> this_year_report()
+      R$1.000,00
+
+  """
+  def this_year_report() do #TODO REFACTOR, THIS OPERATION IS VERY EXPENSIVE AND SHOULD BE OPTIMIZED
+    now = Timex.now()
+
+    withdraw_registers = Repo.all(
+      from w in WithdrawRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_year(now),
+      where: w.inserted_at <= ^Timex.end_of_year(now)
+    )
+
+    transference_registers = Repo.all(
+      from w in TransferenceRegister,
+      where: w.inserted_at >= ^Timex.beginning_of_year(now),
+      where: w.inserted_at <= ^Timex.end_of_year(now)
+    )
+
+    calculate_total_value(withdraw_registers, transference_registers)
+  end
+
+  defp calculate_total_value(withdraw_registers, transference_registers) do
+    withdraw_registers
+    |> Enum.concat(transference_registers)
+    |> Enum.reduce(
+      Money.new(0),
+      fn x, acc ->
+        Money.add(x.value, acc)
+      end)
+    |> Money.to_string()
+  end
 end

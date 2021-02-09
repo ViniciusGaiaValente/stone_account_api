@@ -33,5 +33,9 @@ defmodule StoneAccountApiWeb.Router do
 
     get "/withdraws", WithdrawRegisterController, :index
     get "/transferences", TransferenceRegisterController, :index
+
+    get "/report/day", ReportController, :day
+    get "/report/month", ReportController, :month
+    get "/report/year", ReportController, :year
   end
 end

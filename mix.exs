@@ -44,7 +44,8 @@ defmodule StoneAccountApi.MixProject do
       {:bcrypt_elixir, "~> 2.0"},
       {:money, "~> 1.4"},
       {:guardian, "~> 2.0"},
-      {:bamboo, "~> 1.7.0"}
+      {:bamboo, "~> 1.7.0"},
+      {:timex, "~> 3.6"}
     ]
   end
 
