@@ -80,19 +80,28 @@ defmodule StoneAccountApi.ReportControllerTest do
 
     test "day renders the correct data", %{conn: conn} do
       report_ficture()
-      request = get(conn, Routes.report_path(conn, :day))
+      request=
+        conn
+        |> put_req_header("authorization",  "Basic #{Base.encode64("admin:1234")}")
+        |> get(Routes.report_path(conn, :day))
       assert json_response(request, 200)["total_transactions"] == "R$200,00"
     end
 
     test "month renders the correct data", %{conn: conn} do
       report_ficture()
-      request = get(conn, Routes.report_path(conn, :month))
+      request=
+        conn
+        |> put_req_header("authorization",  "Basic #{Base.encode64("admin:1234")}")
+        |> get(Routes.report_path(conn, :month))
       assert json_response(request, 200)["total_transactions"] == "R$200,00"
     end
 
     test "year renders the correct data", %{conn: conn} do
       report_ficture()
-      request = get(conn, Routes.report_path(conn, :year))
+      request=
+        conn
+        |> put_req_header("authorization",  "Basic #{Base.encode64("admin:1234")}")
+        |> get(Routes.report_path(conn, :year))
       assert json_response(request, 200)["total_transactions"] == "R$200,00"
     end
   end

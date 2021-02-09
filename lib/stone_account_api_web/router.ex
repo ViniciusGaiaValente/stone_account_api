@@ -13,6 +13,10 @@ defmodule StoneAccountApiWeb.Router do
     plug StoneAccountApiWeb.OwnerPlug
   end
 
+  pipeline :backoffice_auth do
+    plug StoneAccountApiWeb.BackofficeAuthPlug
+  end
+
   scope "/api", StoneAccountApiWeb do
     pipe_through :api
 
@@ -29,7 +33,7 @@ defmodule StoneAccountApiWeb.Router do
   end
 
   scope "/api/backoffice", StoneAccountApiWeb do
-    pipe_through :api
+    pipe_through [:api, :backoffice_auth]
 
     get "/withdraws", WithdrawRegisterController, :index
     get "/transferences", TransferenceRegisterController, :index

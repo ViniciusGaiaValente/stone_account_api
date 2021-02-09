@@ -3,7 +3,10 @@ defmodule StoneAccountApiWeb.TransferenceRegisterControllerTest do
 
   describe "index" do
     test "lists all transference_registers", %{conn: conn} do
-      conn = get(conn, Routes.transference_register_path(conn, :index))
+      conn =
+        conn
+        |> put_req_header("authorization",  "Basic #{Base.encode64("admin:1234")}")
+        |> get(Routes.transference_register_path(conn, :index))
       assert json_response(conn, 200)["data"] == []
     end
   end
