@@ -28,10 +28,10 @@ defmodule StoneAccountApiWeb.Router do
     post "/withdraw", WithdrawController, :withdraw
   end
 
-  scope "/api/backofice", StoneAccountApiWeb do
+  scope "/api/backoffice", StoneAccountApiWeb do
     pipe_through :api
 
     get "/withdraws", WithdrawRegisterController, :index
-    get "/trasnferencee", TransferenceRegisterController, :index
+    get "/transferences", TransferenceRegisterController, :index
   end
 end

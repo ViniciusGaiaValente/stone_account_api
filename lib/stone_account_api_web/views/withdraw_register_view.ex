@@ -12,8 +12,9 @@ defmodule StoneAccountApiWeb.WithdrawRegisterView do
 
   def render("withdraw_register.json", %{withdraw_register: withdraw_register}) do
     %{id: withdraw_register.id,
-      old_balance: withdraw_register.old_balance,
-      new_balance: withdraw_register.new_balance,
-      value: withdraw_register.value}
+      account_id: withdraw_register.account_id,
+      old_balance: Money.to_string(withdraw_register.old_balance),
+      new_balance: Money.to_string(withdraw_register.new_balance),
+      value: Money.to_string(withdraw_register.value)}
   end
 end

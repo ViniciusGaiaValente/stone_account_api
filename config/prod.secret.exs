@@ -35,11 +35,30 @@ jwt_key =
   System.get_env("JWT_KEY") ||
     raise """
     environment variable JWT_KEY is missing.
-    You can generate one by calling: mix phx.gen.secret
     """
 
 config :stone_account_api, StoneAccountApi.Auth.Guardian,
   secret_key: jwt_key
+
+mailgun_api_key =
+  System.get_env("MAILGUN_API_KEY") ||
+  raise """
+  environment variable MAILGUN_API_KEY is missing.
+  """
+
+mailgun_domain =
+  System.get_env("MAILGUN_DOMAIN") ||
+  raise """
+  environment variable MAILGUN_DOMAIN is missing.
+  """
+
+config :stone_account_api, StoneAccountApi.Mailer,
+  adapter: Bamboo.MailgunAdapter,
+  api_key: mailgun_api_key,
+  domain: mailgun_domain,
+  hackney_opts: [
+    recv_timeout: :timer.minutes(1)
+  ]
 
 # ## Using releases (Elixir v1.9+)
 #

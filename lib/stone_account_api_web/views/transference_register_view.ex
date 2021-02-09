@@ -12,10 +12,12 @@ defmodule StoneAccountApiWeb.TransferenceRegisterView do
 
   def render("transference_register.json", %{transference_register: transference_register}) do
     %{id: transference_register.id,
-      origin_old_balance: transference_register.origin_old_balance,
-      origin_new_balance: transference_register.origin_new_balance,
-      destination_old_balance: transference_register.destination_old_balance,
-      destination_new_balance: transference_register.destination_new_balance,
-      value: transference_register.value}
+      origin_id: transference_register.origin_id,
+      destination_id: transference_register.destination_id,
+      origin_old_balance: Money.to_string(transference_register.origin_old_balance),
+      origin_new_balance: Money.to_string(transference_register.origin_new_balance),
+      destination_old_balance: Money.to_string(transference_register.destination_old_balance),
+      destination_new_balance: Money.to_string(transference_register.destination_new_balance),
+      value:  Money.to_string(transference_register.value)}
   end
 end

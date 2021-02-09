@@ -19,6 +19,7 @@ defmodule StoneAccountApi.Withdraw do
   alias StoneAccountApi.Banking.Account
   alias StoneAccountApi.Withdraw
   alias StoneAccountApi.Backoffice
+  alias StoneAccountApi.Email
 
   def withdraw(logged_account, origin, value) do
     withdraw(
@@ -38,6 +39,7 @@ defmodule StoneAccountApi.Withdraw do
     |> check_account_existence()
     |> check_balance()
     |> withdraw_money()
+    |> notify_email()
     |> backoffice_entry()
     |> extract_output()
   end
@@ -179,6 +181,34 @@ defmodule StoneAccountApi.Withdraw do
       end
   end
 
+  defp notify_email(
+    %Withdraw{
+      origin_account: origin_account,
+      origin_account_number: origin_account_number,
+      value: value,
+      valid: valid
+    } = withdraw
+  ) do
+    Task.async(fn ->
+      if valid do
+        %{
+          holder: %{
+            name: name,
+            email: email
+          }
+        } = origin_account
+        Email.notify_withdraw(
+          name: name,
+          email: email,
+          account_number: origin_account_number,
+          value: value
+        )
+      end
+    end)
+
+    withdraw
+  end
+
   defp backoffice_entry(
     %Withdraw{
       origin_account: origin_account,
@@ -187,23 +217,24 @@ defmodule StoneAccountApi.Withdraw do
       valid: valid
     } = withdraw
   ) do
+    Task.async(fn ->
+      if valid do
 
-    if valid do
+        {result, reason} = Backoffice.create_withdraw_register(
+          %{
+            new_balance: origin_account_new_balance,
+            old_balance: origin_account.balance,
+            value: Money.new(value),
+            account_id: origin_account.id
+          }
+        )
 
-      {result, _reason} = Backoffice.create_withdraw_register(
-        %{
-          new_balance: origin_account_new_balance,
-          old_balance: origin_account.balance,
-          value: Money.new(value),
-          account_id: origin_account.id
-        }
-      )
+        if result == :error do
+          IO.inspect(reason)
+        end
 
-      if result == :error do
-        # TODO LOG THE CORRECT ERROR
       end
-
-    end
+    end)
 
     withdraw
   end

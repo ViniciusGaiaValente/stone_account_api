@@ -41,6 +41,14 @@ config :stone_account_api, StoneAccountApi.Auth.Guardian,
   issuer: "stone_account_api",
   secret_key: "1MhEzwneZ+tY5qf4taOACxhgvg2340OmIFNTVykbIkiIkF+LnKgfJd3bXioNWD9v"
 
+config :stone_account_api, StoneAccountApi.Email.Mailer,
+  adapter: Bamboo.MailgunAdapter,
+  api_key: System.get_env("MAILGUN_API_KEY"),
+  domain: System.get_env("MAILGUN_DOMAIN"),
+  hackney_opts: [
+    recv_timeout: :timer.minutes(1)
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

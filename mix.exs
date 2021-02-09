@@ -43,7 +43,8 @@ defmodule StoneAccountApi.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:bcrypt_elixir, "~> 2.0"},
       {:money, "~> 1.4"},
-      {:guardian, "~> 2.0"}
+      {:guardian, "~> 2.0"},
+      {:bamboo, "~> 1.7.0"}
     ]
   end
 
