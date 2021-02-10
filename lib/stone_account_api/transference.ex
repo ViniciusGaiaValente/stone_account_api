@@ -23,6 +23,17 @@ defmodule StoneAccountApi.Transference do
   alias StoneAccountApi.Transference
   alias StoneAccountApi.Backoffice
 
+  @doc """
+  Transfer money from an account to another if all the validation passes.
+  The value field represents the amount to be transferred in cents.
+  Return a list of errors in case of validation errors or rules violation.
+  Possible errors:
+    - numeric fields are different them positive integers.
+    - the origin account and the destination account are the same.
+    - user's not logged to the origin account.
+    - the value to be transferred is bigger than the origin account's balance.
+  If the operation is successful an entry to the backoffice is fired in the background.
+  """
   def tranfer(logged_account, origin, destination, value) do
     tranfer(
         %Transference{
@@ -260,23 +271,23 @@ defmodule StoneAccountApi.Transference do
     } = transference
   ) do
     if valid do
+      Task.async(fn ->
+        {result, _reason} = Backoffice.create_transference_register(
+          %{
+            origin_old_balance: origin_account.balance,
+            origin_new_balance: origin_account_new_balance,
+            destination_old_balance: destination_account.balance,
+            destination_new_balance: destination_account_new_balance,
+            value: Money.new(value),
+            origin_id: origin_account.id,
+            destination_id: destination_account.id
+          }
+        )
 
-      {result, _reason} = Backoffice.create_transference_register(
-        %{
-          origin_old_balance: origin_account.balance,
-          origin_new_balance: origin_account_new_balance,
-          destination_old_balance: destination_account.balance,
-          destination_new_balance: destination_account_new_balance,
-          value: Money.new(value),
-          origin_id: origin_account.id,
-          destination_id: destination_account.id
-        }
-      )
-
-      if result == :error do
-        # TODO LOG THE CORRECT ERROR
-      end
-
+        if result == :error do
+          # TODO LOG THE CORRECT ERROR
+        end
+      end)
     end
 
     transference

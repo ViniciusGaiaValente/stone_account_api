@@ -1,12 +1,4 @@
 defmodule StoneAccountApi.EmailTest do
   use StoneAccountApi.DataCase
-
-  # alias StoneAccountApi.Email
-
-  # describe "mailer" do
-
-  #   test "test welcome_email/0" do
-  #     Email.welcome_email()
-  #   end
-  # end
+  # TODO IMPLEMENT TEST THAT DOES NOT ACTUALLY SEND THE EMAILS, DUE TO THE POSSIBLE COSTS INVOLVING IT
 end

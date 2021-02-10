@@ -21,6 +21,16 @@ defmodule StoneAccountApi.Withdraw do
   alias StoneAccountApi.Backoffice
   alias StoneAccountApi.Email
 
+  @doc """
+  Withdraw money from an account if all the validation passes.
+  The value field represents the amount to be transferred in cents.
+  Return a list of errors in case of validation errors or rules violation.
+  Possible errors:
+    - numeric fields are different them positive integers.
+    - user's not logged to the account.
+    - the value to be transferred is bigger than the account's balance.
+  If the operation is successful an entry to the backoffice is fired in the background.
+  """
   def withdraw(logged_account, origin, value) do
     withdraw(
       %Withdraw{

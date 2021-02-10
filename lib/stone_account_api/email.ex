@@ -3,15 +3,9 @@ defmodule StoneAccountApi.Email do
 
   alias StoneAccountApi.Email.Mailer
 
-  def welcome_email do
-    send(
-      to: { "Vinicius Valente", "viniciusvalente.dev@gmail.com" },
-      subject: "NOVO TESTE",
-      html_body: "<strong>NOVO TESTE</strong>",
-      text_body: "NOVO TESTE"
-    )
-  end
-
+  @doc """
+  Send an email to notify the account's holder about a withdraw
+  """
   def notify_withdraw(
     name: name,
     email: email,

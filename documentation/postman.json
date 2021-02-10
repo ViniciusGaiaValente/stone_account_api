@@ -1,0 +1,392 @@
+{
+	"info": {
+		"_postman_id": "e57dd887-4412-4f4c-805c-b503b4ba36a1",
+		"name": "Stone Account API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"account\":\r\n\t{\r\n\t\t\"password\": \"senha_de_exemplo\",\r\n\t\t\"holder\": {\r\n\t\t\t\"birthdate\": \"2014-04-17T14:00:00Z\",\r\n\t\t\t\"name\": \"Nome de Exemplo\",\r\n\t\t\t\"email\": \"example@email.com\"\r\n\t\t}\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/accounts/signup",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "senha_de_exemplo",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/accounts/signin",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJzdG9uZV9hY2NvdW50X2FwaSIsImV4cCI6MTYxNTM0Mjg0MywiaWF0IjoxNjEyOTIzNjQzLCJpc3MiOiJzdG9uZV9hY2NvdW50X2FwaSIsImp0aSI6IjgzNDBjOWFiLTY5MTMtNDU1Yi04OTBkLTgwZDM3NTQwNmMxYyIsIm5iZiI6MTYxMjkyMzY0Miwic3ViIjoiOTBlNjhjZTUtOTNlOC00ZmQ2LWFlYjMtOTM3N2Q5YTM1ZTM4IiwidHlwIjoiYWNjZXNzIn0.hL3w5JipqDT2jwA8E3mDvC4mr00MJ4MM3hsIcz-nwL-6QMSWJfr107fEbvF-UXFfwoMS9hRSNFQ_Q_I1u-Wq8g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/accounts/1",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Trasnfer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJzdG9uZV9hY2NvdW50X2FwaSIsImV4cCI6MTYxNTM0Mjg0MywiaWF0IjoxNjEyOTIzNjQzLCJpc3MiOiJzdG9uZV9hY2NvdW50X2FwaSIsImp0aSI6IjgzNDBjOWFiLTY5MTMtNDU1Yi04OTBkLTgwZDM3NTQwNmMxYyIsIm5iZiI6MTYxMjkyMzY0Miwic3ViIjoiOTBlNjhjZTUtOTNlOC00ZmQ2LWFlYjMtOTM3N2Q5YTM1ZTM4IiwidHlwIjoiYWNjZXNzIn0.hL3w5JipqDT2jwA8E3mDvC4mr00MJ4MM3hsIcz-nwL-6QMSWJfr107fEbvF-UXFfwoMS9hRSNFQ_Q_I1u-Wq8g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"origin\": 1,\r\n\t\"destination\": 2,\r\n\t\"value\": 5000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/trasnference",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"trasnference"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJzdG9uZV9hY2NvdW50X2FwaSIsImV4cCI6MTYxNTM0Mjg0MywiaWF0IjoxNjEyOTIzNjQzLCJpc3MiOiJzdG9uZV9hY2NvdW50X2FwaSIsImp0aSI6IjgzNDBjOWFiLTY5MTMtNDU1Yi04OTBkLTgwZDM3NTQwNmMxYyIsIm5iZiI6MTYxMjkyMzY0Miwic3ViIjoiOTBlNjhjZTUtOTNlOC00ZmQ2LWFlYjMtOTM3N2Q5YTM1ZTM4IiwidHlwIjoiYWNjZXNzIn0.hL3w5JipqDT2jwA8E3mDvC4mr00MJ4MM3hsIcz-nwL-6QMSWJfr107fEbvF-UXFfwoMS9hRSNFQ_Q_I1u-Wq8g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"origin\": 1,\r\n\t\"value\": 5000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/withdraw",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Backoffice",
+			"item": [
+				{
+					"name": "Report of the Day",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/backoffice/report/day",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"backoffice",
+								"report",
+								"day"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report of the Month",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/backoffice/report/month",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"backoffice",
+								"report",
+								"month"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report of the Year",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/backoffice/report/year",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"backoffice",
+								"report",
+								"year"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Trasnference Registers",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/backoffice/transferences",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"backoffice",
+								"transferences"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Withdraw Registers",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://masculine-defiant-widgeon.gigalixirapp.com/api/backoffice/withdraws",
+							"protocol": "https",
+							"host": [
+								"masculine-defiant-widgeon",
+								"gigalixirapp",
+								"com"
+							],
+							"path": [
+								"api",
+								"backoffice",
+								"withdraws"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
