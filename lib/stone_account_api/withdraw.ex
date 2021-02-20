@@ -91,15 +91,15 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
+  defp validate_rules(%{valid: valid} = withdraw) when not valid do withdraw end
   defp validate_rules(
     %Withdraw{
-      valid: valid,
       logged_account_number: logged_account,
       origin_account_number: origin_account,
       errors: errors
     } = withdraw
   ) do
-    if valid && logged_account != origin_account &&
+    if logged_account != origin_account &&
     not Enum.member?(errors, "You are not allowed to perform this operation.") do
       %Withdraw{
         withdraw |
@@ -112,137 +112,111 @@ defmodule StoneAccountApi.Withdraw do
     end
   end
 
+  defp fetch_account(%{valid: valid} = withdraw) when not valid do withdraw end
   defp fetch_account(
     %Withdraw{
-    origin_account_number: origin_account_number,
-    valid: valid} = withdraw
-  ) do
-    if valid do
-      %Withdraw{
-        withdraw |
-        origin_account: Banking.get_account_by_number(origin_account_number)
-      }
-    else
-      withdraw
-    end
-  end
-
-  defp check_account_existence(
-    %Withdraw{
-      origin_account: origin_account,
-      errors: errors,
-      valid: valid
+      origin_account_number: origin_account_number,
     } = withdraw
   ) do
-    if valid && origin_account == nil &&
-    not Enum.member?(errors, "Could not found your account, please try to signin again.") do
-      %Withdraw{
-        withdraw |
-        valid: false,
-        status_code: :forbidden,
-        errors: List.insert_at(errors, 0, "Could not found your account, please try to signin again.")
-      }
-    else
-      withdraw
-    end
+    %Withdraw{
+      withdraw |
+      origin_account: Banking.get_account_by_number(origin_account_number)
+    }
   end
 
+  defp check_account_existence(%{valid: valid} = withdraw) when not valid do withdraw end
+  defp check_account_existence(%{origin_account: origin_account} = withdraw) when origin_account != nil do withdraw end
+  defp check_account_existence(%{errors: errors} = withdraw) do
+    %Withdraw{
+      withdraw |
+      valid: false,
+      status_code: :forbidden,
+      errors: List.insert_at(errors, 0, "Could not found your account, please try to signin again.")
+    }
+  end
+
+  defp check_balance(%{valid: valid} = withdraw) when not valid do withdraw end
   defp check_balance(
     %Withdraw{
       origin_account: origin_account,
       value: value,
-      valid: valid,
       errors: errors
     } = withdraw
   ) do
-    if valid do
-      if Money.negative?(Money.subtract(origin_account.balance, value)) do
-        %Withdraw{
-          withdraw |
-          valid: false,
-          status_code: :unprocessable_entity,
-          errors: List.insert_at(errors, 0, "Insufficient funds.")
-        }
-      else
-        withdraw
-      end
+    if Money.negative?(Money.subtract(origin_account.balance, value)) do
+      %Withdraw{
+        withdraw |
+        valid: false,
+        status_code: :unprocessable_entity,
+        errors: List.insert_at(errors, 0, "Insufficient funds.")
+      }
     else
       withdraw
     end
   end
 
+  defp withdraw_money(%{valid: valid} = withdraw) when not valid do withdraw end
   defp withdraw_money(
     %Withdraw{
       origin_account: origin_account,
-      value: value,
-      valid: valid
+      value: value
     } = withdraw
   ) do
-    if valid do
-      %Withdraw{
-        withdraw |
-        origin_account_new_balance: origin_account
-          |> Account.balance_update_changeset(%{ balance: Money.subtract(origin_account.balance, value) })
-          |> Repo.update!()
-          |> Map.fetch!(:balance)
-      }
-      else
-        withdraw
-      end
+    %Withdraw{
+      withdraw |
+      origin_account_new_balance: origin_account
+        |> Account.balance_update_changeset(%{ balance: Money.subtract(origin_account.balance, value) })
+        |> Repo.update!()
+        |> Map.fetch!(:balance)
+    }
   end
 
+  defp notify_email(%{valid: valid} = withdraw) when not valid do withdraw end
   defp notify_email(
     %Withdraw{
       origin_account: origin_account,
       origin_account_number: origin_account_number,
-      value: value,
-      valid: valid
+      value: value
     } = withdraw
   ) do
     Task.async(fn ->
-      if valid do
-        %{
-          holder: %{
-            name: name,
-            email: email
-          }
-        } = origin_account
-        Email.notify_withdraw(
-          name: name,
-          email: email,
-          account_number: origin_account_number,
-          value: value
-        )
-      end
+      %{
+        holder: %{
+        name: name,
+        email: email
+      }
+      } = origin_account
+      Email.notify_withdraw(
+        name: name,
+        email: email,
+        account_number: origin_account_number,
+        value: value
+      )
     end)
 
     withdraw
   end
 
+  defp backoffice_entry(%{valid: valid} = withdraw) when not valid do withdraw end
   defp backoffice_entry(
     %Withdraw{
       origin_account: origin_account,
       origin_account_new_balance: origin_account_new_balance,
-      value: value,
-      valid: valid
+      value: value
     } = withdraw
   ) do
     Task.async(fn ->
-      if valid do
+      {result, reason} = Backoffice.create_withdraw_register(
+        %{
+          new_balance: origin_account_new_balance,
+          old_balance: origin_account.balance,
+          value: Money.new(value),
+          account_id: origin_account.id
+        }
+      )
 
-        {result, reason} = Backoffice.create_withdraw_register(
-          %{
-            new_balance: origin_account_new_balance,
-            old_balance: origin_account.balance,
-            value: Money.new(value),
-            account_id: origin_account.id
-          }
-        )
-
-        if result == :error do
-          IO.inspect(reason)
-        end
-
+      if result == :error do
+        IO.inspect(reason)
       end
     end)
 
@@ -253,23 +227,25 @@ defmodule StoneAccountApi.Withdraw do
     %Withdraw{
       valid: valid,
       errors: errors,
+      status_code: status_code
+    }
+  ) when not valid do { :error, errors, status_code } end
+
+  defp extract_output(
+    %Withdraw{
       status_code: status_code,
       value: value,
       origin_account_number: origin_account_number,
       origin_account_new_balance: origin_account_new_balance
     }
   ) do
-    if valid do
-      { :ok,
-        %{
-          origin: origin_account_number,
-          value: value,
-          balance: origin_account_new_balance,
-        },
-        status_code
-      }
-    else
-      { :error, errors, status_code }
-    end
+    { :ok,
+      %{
+        origin: origin_account_number,
+        value: value,
+        balance: origin_account_new_balance,
+      },
+      status_code
+    }
   end
 end

@@ -106,9 +106,9 @@ defmodule StoneAccountApi.Transference do
     end
   end
 
+  defp validate_rules(%{valid: valid} = transference) when not valid do transference end
   defp validate_rules(
     %Transference{
-      valid: valid,
       logged_account_number: logged_account_number,
       origin_account_number: origin_account_number,
       destination_account_number: destination_account_number,
@@ -116,8 +116,6 @@ defmodule StoneAccountApi.Transference do
     } = transference
   ) do
     cond do
-
-      not valid -> transference
 
       origin_account_number == destination_account_number &&
       not Enum.member?(errors, "'origin' and 'destination' must be diferent.") ->
@@ -147,38 +145,32 @@ defmodule StoneAccountApi.Transference do
     end
   end
 
+  defp fetch_accounts(%{valid: valid} = transference) when not valid do transference end
   defp fetch_accounts(
     %Transference{
-    origin_account_number: origin_account_number,
-    destination_account_number: destination_account_number,
-    valid: valid} = transference
+      origin_account_number: origin_account_number,
+      destination_account_number: destination_account_number
+    } = transference
   ) do
-    if valid do
-      origin_account = Banking.get_account_by_number(origin_account_number)
-      destination_account = Banking.get_account_by_number(destination_account_number)
+    origin_account = Banking.get_account_by_number(origin_account_number)
+    destination_account = Banking.get_account_by_number(destination_account_number)
 
-      %Transference{
-        transference |
-        origin_account: origin_account,
-        destination_account: destination_account
-      }
-    else
-      transference
-    end
+    %Transference{
+      transference |
+      origin_account: origin_account,
+      destination_account: destination_account
+    }
   end
 
+  defp check_accounts_existence(%{valid: valid} = transference) when not valid do transference end
   defp check_accounts_existence(
     %Transference{
       origin_account: origin_account,
       destination_account: destination_account,
-      errors: errors,
-      valid: valid} = transference
+      errors: errors
+    } = transference
   ) do
-
     cond do
-
-      not valid -> transference
-
       origin_account == nil &&
       not Enum.member?(
         errors,
@@ -191,7 +183,6 @@ defmodule StoneAccountApi.Transference do
             status_code: :unprocessable_entity,
             errors: List.insert_at(errors, 0, "Could not found your account, please try to signin again.")
           })
-
       destination_account == nil &&
       not Enum.member?(
         errors,
@@ -204,37 +195,31 @@ defmodule StoneAccountApi.Transference do
             status_code: :unprocessable_entity,
             errors: List.insert_at(errors, 0, "This destination account does not exist.")
           })
-
       true -> transference
-
     end
-
   end
 
+  defp check_balance(%{valid: valid} = transference) when not valid do transference end
   defp check_balance(
     %Transference{
       origin_account: origin_account,
       value: value,
-      valid: valid,
       errors: errors
     } = transference
   ) do
-    if valid do
-      if Money.negative?(Money.subtract(origin_account.balance, value)) do
-        %Transference{
-          transference |
-          valid: false,
-          status_code: :unprocessable_entity,
-          errors: List.insert_at(errors, 0, "Insufficient funds.")
-        }
-      else
-        transference
-      end
+    if Money.negative?(Money.subtract(origin_account.balance, value)) do
+      %Transference{
+        transference |
+        valid: false,
+        status_code: :unprocessable_entity,
+        errors: List.insert_at(errors, 0, "Insufficient funds.")
+      }
     else
       transference
     end
   end
 
+  defp transfer_money(%{valid: valid} = transference) when not valid do transference end
   defp transfer_money(
     %Transference{
       origin_account: origin_account,
@@ -260,35 +245,33 @@ defmodule StoneAccountApi.Transference do
       end
   end
 
+  defp backoffice_entry(%{valid: valid} = transference) when not valid do transference end
   defp backoffice_entry(
     %Transference{
       origin_account: origin_account,
       origin_account_new_balance: origin_account_new_balance,
       destination_account: destination_account,
       destination_account_new_balance: destination_account_new_balance,
-      value: value,
-      valid: valid
+      value: value
     } = transference
   ) do
-    if valid do
-      Task.async(fn ->
-        {result, _reason} = Backoffice.create_transference_register(
-          %{
-            origin_old_balance: origin_account.balance,
-            origin_new_balance: origin_account_new_balance,
-            destination_old_balance: destination_account.balance,
-            destination_new_balance: destination_account_new_balance,
-            value: Money.new(value),
-            origin_id: origin_account.id,
-            destination_id: destination_account.id
-          }
-        )
+    Task.async(fn ->
+      {result, reason} = Backoffice.create_transference_register(
+        %{
+          origin_old_balance: origin_account.balance,
+          origin_new_balance: origin_account_new_balance,
+          destination_old_balance: destination_account.balance,
+          destination_new_balance: destination_account_new_balance,
+          value: Money.new(value),
+          origin_id: origin_account.id,
+          destination_id: destination_account.id
+        }
+      )
 
-        if result == :error do
-          # TODO LOG THE CORRECT ERROR
-        end
-      end)
-    end
+      if result == :error do
+        IO.inspect(reason)
+      end
+    end)
 
     transference
   end
@@ -297,6 +280,12 @@ defmodule StoneAccountApi.Transference do
     %Transference{
       valid: valid,
       errors: errors,
+      status_code: status_code
+    }
+  ) when not valid do { :error, errors, status_code } end
+
+  defp extract_output(
+    %Transference{
       status_code: status_code,
       value: value,
       origin_account_number: origin_account_number,
@@ -304,18 +293,14 @@ defmodule StoneAccountApi.Transference do
       origin_account_new_balance: origin_account_new_balance
     }
   ) do
-    if valid do
-      { :ok,
-        %{
-          origin: origin_account_number,
-          destination: destination_account_number,
-          value: value,
-          balance: origin_account_new_balance,
-        },
-        status_code
-      }
-    else
-      { :error, errors, status_code }
-    end
+    { :ok,
+      %{
+        origin: origin_account_number,
+        destination: destination_account_number,
+        value: value,
+        balance: origin_account_new_balance,
+      },
+      status_code
+    }
   end
 end
