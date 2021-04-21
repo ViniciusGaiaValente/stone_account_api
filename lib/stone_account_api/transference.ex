@@ -17,6 +17,7 @@ defmodule StoneAccountApi.Transference do
     errors: []
   )
 
+  alias Ecto.Multi
   alias StoneAccountApi.Repo
   alias StoneAccountApi.Banking
   alias StoneAccountApi.Banking.Account
@@ -50,7 +51,6 @@ defmodule StoneAccountApi.Transference do
     |> validate_rules()
     |> fetch_accounts()
     |> check_accounts_existence()
-    |> check_balance()
     |> transfer_money()
     |> backoffice_entry()
     |> extract_output()
@@ -199,50 +199,68 @@ defmodule StoneAccountApi.Transference do
     end
   end
 
-  defp check_balance(%{valid: valid} = transference) when not valid do transference end
-  defp check_balance(
-    %Transference{
-      origin_account: origin_account,
-      value: value,
-      errors: errors
-    } = transference
-  ) do
-    if Money.negative?(Money.subtract(origin_account.balance, value)) do
-      %Transference{
-        transference |
-        valid: false,
-        status_code: :unprocessable_entity,
-        errors: List.insert_at(errors, 0, "Insufficient funds.")
-      }
+  defp validate_balance(balance, value) do
+    if Money.negative?(Money.subtract(balance, value)) do
+      { :error, "Insufficient funds." }
     else
-      transference
+      { :ok, true }
     end
   end
 
   defp transfer_money(%{valid: valid} = transference) when not valid do transference end
   defp transfer_money(
     %Transference{
-      origin_account: origin_account,
-      destination_account: destination_account,
+      origin_account_number: origin_account_number,
+      destination_account_number: destination_account_number,
       value: value,
-      valid: valid
+      errors: errors
     } = transference
   ) do
-    if valid do
-      %Transference{
-        transference |
-        origin_account_new_balance: origin_account
-          |> Account.balance_update_changeset(%{ balance: Money.subtract(origin_account.balance, value) })
+    case Multi.new()
+      |> Multi.run(:origin_account, fn _repo, _changes -> Banking.search_account(origin_account_number) end)
+      |> Multi.run(:validate_balance, fn _repo, %{ origin_account: %{ balance: balance } } -> validate_balance(balance, value) end)
+      |> Multi.run(:destination_account, fn _repo, _changes -> Banking.search_account(destination_account_number) end)
+      |> Multi.run(:origin_account_new_balance, fn _repo, %{ origin_account: %{ balance: balance } = origin_account } ->
+        { :ok,
+          origin_account
+          |> Account.balance_update_changeset(%{ balance: Money.subtract(balance, value) })
           |> Repo.update!()
           |> Map.fetch!(:balance),
-        destination_account_new_balance: destination_account
-          |> Account.balance_update_changeset(%{ balance: Money.add(destination_account.balance, value) })
-          |> Repo.update!()
-          |> Map.fetch!(:balance)
-      }
-      else
-        transference
-      end
+        }
+      end)
+      |> Multi.run(:destination_account_new_balance, fn _repo, %{ destination_account: %{ balance: balance } = destination_account } ->
+        { :ok,
+        destination_account
+        |> Account.balance_update_changeset(%{ balance: Money.add(balance, value) })
+        |> Repo.update!()
+        |> Map.fetch!(:balance)
+        }
+      end)
+      |> Repo.transaction()
+    do
+      { :ok,
+        %{
+          origin_account: origin_account,
+          destination_account: destination_account,
+          origin_account_new_balance: origin_account_new_balance,
+          destination_account_new_balance: destination_account_new_balance
+        }
+      } ->
+        %Transference{
+          transference |
+          origin_account: origin_account,
+          destination_account: destination_account,
+          origin_account_new_balance: origin_account_new_balance,
+          destination_account_new_balance: destination_account_new_balance
+        }
+      {:error, _at, reason, _value } ->
+        %Transference{
+          transference |
+          valid: false,
+          status_code: :bad_request,
+          errors: List.insert_at(errors, 0, reason)
+        }
+    end
   end
 
   defp backoffice_entry(%{valid: valid} = transference) when not valid do transference end

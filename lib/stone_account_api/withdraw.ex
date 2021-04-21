@@ -14,6 +14,7 @@ defmodule StoneAccountApi.Withdraw do
     errors: []
   )
 
+  alias Ecto.Multi
   alias StoneAccountApi.Repo
   alias StoneAccountApi.Banking
   alias StoneAccountApi.Banking.Account
@@ -47,7 +48,6 @@ defmodule StoneAccountApi.Withdraw do
     |> validate_rules()
     |> fetch_account()
     |> check_account_existence()
-    |> check_balance()
     |> withdraw_money()
     |> notify_email()
     |> backoffice_entry()
@@ -135,40 +135,54 @@ defmodule StoneAccountApi.Withdraw do
     }
   end
 
-  defp check_balance(%{valid: valid} = withdraw) when not valid do withdraw end
-  defp check_balance(
-    %Withdraw{
-      origin_account: origin_account,
-      value: value,
-      errors: errors
-    } = withdraw
-  ) do
-    if Money.negative?(Money.subtract(origin_account.balance, value)) do
-      %Withdraw{
-        withdraw |
-        valid: false,
-        status_code: :unprocessable_entity,
-        errors: List.insert_at(errors, 0, "Insufficient funds.")
-      }
+  defp validate_balance(balance, value) do
+    if Money.negative?(Money.subtract(balance, value)) do
+      { :error, "Insufficient funds." }
     else
-      withdraw
+      { :ok, true }
     end
   end
 
   defp withdraw_money(%{valid: valid} = withdraw) when not valid do withdraw end
   defp withdraw_money(
     %Withdraw{
-      origin_account: origin_account,
-      value: value
+      origin_account_number: origin_account_number,
+      value: value,
+      errors: errors
     } = withdraw
   ) do
-    %Withdraw{
-      withdraw |
-      origin_account_new_balance: origin_account
-        |> Account.balance_update_changeset(%{ balance: Money.subtract(origin_account.balance, value) })
-        |> Repo.update!()
-        |> Map.fetch!(:balance)
-    }
+    case Multi.new()
+      |> Multi.run(:origin_account, fn _repo, _changes -> Banking.search_account(origin_account_number) end)
+      |> Multi.run(:validate_balance, fn _repo, %{ origin_account: %{ balance: balance } } -> validate_balance(balance, value) end)
+      |> Multi.run(:origin_account_new_balance, fn _repo, %{ origin_account: %{ balance: balance } = origin_account } ->
+        { :ok,
+          origin_account
+          |> Account.balance_update_changeset(%{ balance: Money.subtract(balance, value) })
+          |> Repo.update!()
+          |> Map.fetch!(:balance),
+        }
+      end)
+      |> Repo.transaction()
+    do
+      { :ok,
+        %{
+          origin_account: origin_account,
+          origin_account_new_balance: origin_account_new_balance,
+        }
+      } ->
+        %Withdraw{
+          withdraw |
+          origin_account: origin_account,
+          origin_account_new_balance: origin_account_new_balance
+        }
+      {:error, _at, reason, _value } ->
+        %Withdraw{
+          withdraw |
+          valid: false,
+          status_code: :bad_request,
+          errors: List.insert_at(errors, 0, reason)
+        }
+    end
   end
 
   defp notify_email(%{valid: valid} = withdraw) when not valid do withdraw end
@@ -182,9 +196,9 @@ defmodule StoneAccountApi.Withdraw do
     Task.async(fn ->
       %{
         holder: %{
-        name: name,
-        email: email
-      }
+          name: name,
+          email: email
+        }
       } = origin_account
       Email.notify_withdraw(
         name: name,

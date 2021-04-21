@@ -55,6 +55,31 @@ defmodule StoneAccountApi.Banking do
   end
 
   @doc """
+  Return a tuple with :ok and the account with the given number and the holder associated to it.
+
+  Return { :error, "account not found" } if the Account does not exist.
+
+  ## Examples
+
+      iex> get_account_by_number(1)
+      { :ok, %Account{}}
+
+      iex> get_account_by_number(2)
+      { :error, "account not found" }
+  """
+  def search_account(number) do
+    case Repo.get_by(Account, number: number) do
+    nil -> { :error, "account not found" }
+    account ->
+      {
+        :ok,
+        account
+        |> Repo.preload(:holder)
+      }
+    end
+  end
+
+  @doc """
   Creates a account, returns it self and the holder associated to it.
 
   ## Examples
